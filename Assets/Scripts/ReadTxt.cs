@@ -22,7 +22,6 @@ public class ReadTxt : MonoBehaviour
     public static string charge;
 
     public static string line;
-    public static string filePath = Application.dataPath + "/Datas" + "/test2.ent";
     public static List<Atom> atoms = new List<Atom>();
     public static List<string> conects = new List<string>();
     public static List<int> lines = new List<int>();
@@ -43,7 +42,7 @@ public class ReadTxt : MonoBehaviour
 
     public static void Read()
     {
-        using (StreamReader reader = new StreamReader(filePath))
+        using (StreamReader reader = new StreamReader(GlobalVars.filePath))
         {
             while ((line = reader.ReadLine()) != null)
             {

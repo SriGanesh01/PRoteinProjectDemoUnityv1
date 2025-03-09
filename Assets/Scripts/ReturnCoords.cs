@@ -22,7 +22,6 @@ public class ReturnCoords : MonoBehaviour
     public static string charge;
 
     public static string line;
-    public static string filePath = Application.dataPath + "/Datas" + "/test2.ent";
     public static List<Atom> atoms = new List<Atom>();
 
     public static float x1;
@@ -35,7 +34,7 @@ public class ReturnCoords : MonoBehaviour
 
     public static void SerialToCoords(int serialVal1, int serialVal2)
     {
-        using (StreamReader reader = new StreamReader(filePath))
+        using (StreamReader reader = new StreamReader(GlobalVars.filePath))
         {
             while ((line = reader.ReadLine()) != null)
             {

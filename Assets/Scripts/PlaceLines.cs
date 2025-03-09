@@ -20,7 +20,7 @@ public class PlaceLines : MonoBehaviour
     {
         GameObject line = new GameObject();
         LineRenderer lineRenderer = line.AddComponent<LineRenderer>();
-        lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
+        // lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
         lineRenderer.widthMultiplier = 0.1f;
         lineRenderer.positionCount = 2;
         lineRenderer.SetPosition(0, new Vector3(x1, y1, z1));

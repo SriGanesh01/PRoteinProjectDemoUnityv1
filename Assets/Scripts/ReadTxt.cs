@@ -1,7 +1,7 @@
 using UnityEngine;
-using System.IO;
 using System.Collections.Generic;
 using System;
+using System.IO;
 
 public class ReadTxt : MonoBehaviour
 {
@@ -9,6 +9,7 @@ public class ReadTxt : MonoBehaviour
     public static int atomSerial;
     public static string atomName;
     public static string altLoc;
+    public static string fullAtomName;
     public static string residueName;
     public static string chainId;
     public static int residueSeq;
@@ -28,7 +29,6 @@ public class ReadTxt : MonoBehaviour
     public static List<List<int>> AllLines = new List<List<int>>();
     public static List<int> FirstLine = new List<int>();
 
-
     private void Awake()
     {
         Read();
@@ -40,20 +40,59 @@ public class ReadTxt : MonoBehaviour
         ReadLines();
     }
 
+    public static void ReloadFile()
+    {
+        // Remove old spheres
+        GameObject[] existingSpheres = GameObject.FindGameObjectsWithTag("AtomSphere");
+        if (existingSpheres.Length > 0)
+        {
+            foreach (GameObject sphere in existingSpheres)
+            {
+                GameObject.Destroy(sphere);
+            }
+        }
+
+        // Clear old data
+        atoms.Clear();
+        conects.Clear();
+        lines.Clear();
+        AllLines.Clear();
+        FirstLine.Clear();
+
+        // Load new data
+        Read();
+        ReadSpheres();
+        ReadLines();
+    }
+
     public static void Read()
     {
-        using (StreamReader reader = new StreamReader(GlobalVars.filePath))
+        string fileName = Path.GetFileNameWithoutExtension(GlobalVars.fileName); // e.g., "1CRN"
+        TextAsset file = Resources.Load<TextAsset>("Datas/" + fileName);
+
+        if (file == null)
+        {
+            Debug.LogError("Could not load file from Resources: " + GlobalVars.fileName);
+            return;
+        }
+
+        using (StringReader reader = new StringReader(file.text))
         {
             while ((line = reader.ReadLine()) != null)
             {
-                if (line.Substring(0, 6).Trim() == "ATOM" || line.Substring(0, 6).Trim() == "HETATM")
+                if (line.Length < 6) continue;
+
+                string tag = line.Substring(0, 6).Trim();
+
+                if (tag == "ATOM" || tag == "HETATM")
                 {
                     Atom atom = new Atom
                     {
-                        RecordName = line.Substring(0, 6).Trim(),
+                        RecordName = tag,
                         AtomSerial = int.Parse(line.Substring(6, 5).Trim()),
                         AtomName = line.Substring(12, 4).Trim(),
                         AltLoc = line.Substring(16, 1).Trim(),
+                        FullAtomName = line.Substring(12, 5).Trim(),
                         ResidueName = line.Substring(17, 3).Trim(),
                         ChainId = line.Substring(21, 1).Trim(),
                         ResidueSeq = int.Parse(line.Substring(22, 4).Trim()),
@@ -66,18 +105,14 @@ public class ReadTxt : MonoBehaviour
                         Element = line.Length >= 78 ? line.Substring(76, 2).Trim() : "",
                         Charge = line.Length >= 80 ? line.Substring(78, 2).Trim() : ""
                     };
+
                     atoms.Add(atom);
-                    if (atom.AtomSerial == 1)
-                    {
-                        
-                    }
                 }
 
-                if (line.Substring(0, 6).Trim() == "CONECT")
+                if (tag == "CONECT")
                 {
                     conects.Add(line);
                 }
-
             }
         }
     }
@@ -104,20 +139,17 @@ public class ReadTxt : MonoBehaviour
             FirstLine.Add(int.Parse(numbers[0]));
             AllLines.Add(lines);
             lines = new List<int>();
-
         }
 
         foreach (var line in AllLines)
         {
-            for (int i = 0; i < 1; i++)
+            if (line.Count == 0) continue;
+
+            val = line[0];
+            foreach (var each in line)
             {
-                val = line[i];
-                foreach (var each in line)
-                {
-                    ReturnCoords.SerialToCoords(val, each);
-                    PlaceLines.InstantiateLines(ReturnCoords.x1, ReturnCoords.y1, ReturnCoords.z1, ReturnCoords.x2, ReturnCoords.y2, ReturnCoords.z2);
-                }
-                i = 0;
+                ReturnCoords.SerialToCoords(val, each);
+                PlaceLines.InstantiateLines(ReturnCoords.x1, ReturnCoords.y1, ReturnCoords.z1, ReturnCoords.x2, ReturnCoords.y2, ReturnCoords.z2);
             }
         }
     }
@@ -129,6 +161,7 @@ public class Atom
     public int AtomSerial { get; set; }
     public string AtomName { get; set; }
     public string AltLoc { get; set; }
+    public string FullAtomName { get; set; }
     public string ResidueName { get; set; }
     public string ChainId { get; set; }
     public int ResidueSeq { get; set; }

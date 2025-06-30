@@ -22,6 +22,7 @@ public class PlaceSpheres : MonoBehaviour
         sphere.GetComponent<Renderer>().material.color = color;
         sphere.GetComponent<Renderer>().material.SetFloat("_Smoothness", 0f);
         sphere.transform.position = new Vector3(x, y, z);
+        sphere.tag = "AtomSphere";
         // Instantiate(sphere, new Vector3(x, y, z), Quaternion.identity);
     }
 }
